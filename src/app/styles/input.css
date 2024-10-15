@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .radio-button {
+    @apply w-4 h-4 text-black outline-none bg-gray-100 border-gray-300  dark:focus:ring-black dark:ring-offset-gray-800;
+  }
+}
+
+
+/* Preview App */
+.preview-app {
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.preview-connection-info {
+  display: flex;
+  align-self: center;
+  margin-bottom: 16px;
+}
+.preview-plugin-wrapper {
+  position: relative;
+  height: 450px;
+  width: 330px;
+  border: 1px solid lightgray;
+}
+.preview-connection-status {
+  border-radius: 50px/50px;
+  background-color: #f00;
+  width: 12px;
+  height: 12px;
+  margin-left: 8px;
+}
+.status-green {
+  background-color: lawngreen;
+}
