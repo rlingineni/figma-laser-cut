@@ -1,24 +1,37 @@
 import * as React from "react";
-import { RouterProvider, createMemoryRouter } from "react-router-dom";
+import { Navigate, RouterProvider, createMemoryRouter } from "react-router-dom";
 import PageWrapper from "./components/PageWrapper";
-import Home from "./pages/Page2";
-import TextSelection from "./pages/TextSelection";
+import Cuts from "./pages/Page2";
+import Spacer from "./pages/Page1";
+import Converter from "./pages/Page3";
 
 function App() {
   const router = createMemoryRouter([
     {
       path: "/",
+      element: <Navigate to="/converter" />,
+    },
+    {
+      path: "/spacer",
       element: (
         <PageWrapper>
-          <TextSelection />
+          <Spacer />
         </PageWrapper>
       ),
     },
     {
-      path: "/page2",
+      path: "/cuts",
       element: (
         <PageWrapper>
-          <Home />
+          <Cuts />
+        </PageWrapper>
+      ),
+    },
+    {
+      path: "/converter",
+      element: (
+        <PageWrapper>
+          <Converter />
         </PageWrapper>
       ),
     },
