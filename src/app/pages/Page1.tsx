@@ -24,7 +24,7 @@ const Page1 = () => {
           </div>
           <div className="w-full flex flex-col gap-4 ">
             <div className="flex">
-              <p className="font-bold text-xs mr-4">Height: </p>
+              <p className="font-bold text-xs mr-4">Length: </p>
               <input type="number" value={5} className="border-gray-200 border-b outline-none w-8 h-4 text-xs mr-1 rounded-sm" />
               <p className="text-xs">mm</p>
             </div>
