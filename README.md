@@ -16,8 +16,10 @@ This plugin is built on top of the blah figma template. In order to run it you c
 
 ```
 npm install
+```
 
-# to live-reload and see a live version
+To preview:
+```
 npm run preview
 ```
 
