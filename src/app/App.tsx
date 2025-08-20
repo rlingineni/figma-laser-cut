@@ -1,15 +1,15 @@
 import * as React from "react";
 import { Navigate, RouterProvider, createMemoryRouter } from "react-router-dom";
 import PageWrapper from "./components/PageWrapper";
-import Cuts from "./pages/Page2";
-import Spacer from "./pages/Page1";
-import Converter from "./pages/Page3";
+import Cuts from "./pages/Cuts";
+import Spacer from "./pages/Spacer";
+import Converter from "./pages/Ruler";
 
 function App() {
   const router = createMemoryRouter([
     {
       path: "/",
-      element: <Navigate to="/converter" />,
+      element: <Navigate to="/spacer" />,
     },
     {
       path: "/spacer",
@@ -28,7 +28,7 @@ function App() {
       ),
     },
     {
-      path: "/converter",
+      path: "/ruler",
       element: (
         <PageWrapper>
           <Converter />

@@ -34,6 +34,11 @@ export class FigmaHelper {
     this.routeCallHandlers();
   }
 
+  addCommandHandlers(commands: FigmaCommand[]) {
+    this.hookCommands = this.hookCommands.concat(commands);
+    this.routeCallHandlers();
+  }
+
   run(command: FigmaMessageCommands, args?: any): Promise<any> {
     // random number to identify the request
     const generatedRequestId = Math.floor(Math.random() * 1000);
