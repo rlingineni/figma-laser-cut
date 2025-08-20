@@ -1,8 +1,10 @@
 {
   "name": "Laser Cuts",
-  "id": "lasercut",
+  "id": "1539858013511152976",
   "api": "1.0.0",
   "main": "dist/code.js",
   "ui": "dist/ui.html",
-  "editorType": ["figma"]
+  "editorType": ["figma"],
+  "networkAccess": { "allowedDomains": ["none"] },
+  "documentAccess": "dynamic-page"
 }
