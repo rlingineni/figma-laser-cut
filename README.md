@@ -10,7 +10,7 @@ Read more [here](https://www.heyraviteja.com/post/portfolio/laser-cuts/)
 
 ## Getting Started
 
-This plugin is built on top of the blah figma template. In order to run it you can:
+In order to run it you can:
 
 #### Development
 
