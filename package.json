@@ -9,7 +9,9 @@
     "dev": "concurrently \"rspack build --config rspack.config.js --watch\" \"yarn:watch-css\"",
     "build": "npm run build-css && NODE_ENV=production rspack build --config rspack.config.js",
     "build-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css",
-    "watch-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css --watch"
+    "watch-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css --watch",
+    "api:dev": "IS_LOCAL=true deno run --allow-net --allow-read --allow-write --allow-env api/main.ts",
+    "dev:full": "concurrently \"yarn:dev\" \"yarn:api:dev\""
   },
   "dependencies": {
     "@figma/plugin-typings": "^1.117.0",

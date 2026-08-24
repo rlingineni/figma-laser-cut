@@ -127,3 +127,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 src/app/styles/ui.css
+
+
+api/.local-rooms

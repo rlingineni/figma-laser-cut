@@ -1,0 +1,15 @@
+{
+  "name": "figcuts-api",
+  "version": "1.0.0",
+  "imports": {
+    "@oak/oak": "jsr:@oak/oak@^17",
+    "react": "npm:react@^18",
+    "react-dom": "npm:react-dom@^18",
+    "react/jsx-runtime": "npm:react@^18/jsx-runtime"
+  },
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "types": ["npm:@types/react@^18"]
+  }
+}
