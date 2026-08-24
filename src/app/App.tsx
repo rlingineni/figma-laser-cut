@@ -2,6 +2,7 @@ import * as React from "react";
 import { Navigate, RouterProvider, createMemoryRouter } from "react-router-dom";
 import PageWrapper from "./components/PageWrapper";
 import Cuts from "./pages/Cuts";
+import Export from "./pages/Export";
 import Spacer from "./pages/Spacer";
 import Converter from "./pages/Ruler";
 
@@ -9,7 +10,7 @@ function App() {
   const router = createMemoryRouter([
     {
       path: "/",
-      element: <Navigate to="/spacer" />,
+      element: <Navigate to="/export" />,
     },
     {
       path: "/spacer",
@@ -32,6 +33,14 @@ function App() {
       element: (
         <PageWrapper>
           <Converter />
+        </PageWrapper>
+      ),
+    },
+    {
+      path: "/export",
+      element: (
+        <PageWrapper>
+          <Export />
         </PageWrapper>
       ),
     },

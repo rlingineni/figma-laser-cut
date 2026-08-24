@@ -1,4 +1,5 @@
 import { FigmaEvents, FigmaMessageCommands } from "../types/commands";
+import { toLaserSafeSvg } from "./svgUtils";
 
 interface FigmaCommandDetails {
   command: FigmaMessageCommands | FigmaEvents;
@@ -133,28 +134,27 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
         break;
       case "get-selected-nodes":
         {
-          {
-            let nodes = figma.currentPage.selection as any[];
-            if (msg.args.withMetadata) {
-              nodes = nodes.map((n) => ({
-                documentId: figma.root.id,
-                pageId: figma.currentPage.id,
-                name: figma.getNodeById(n.id).name,
-                width: n.width,
-                height: n.height,
-                pluginData: n
-                  .getPluginDataKeys()
-                  .map((k) => ({ key: k, value: n.getPluginData(k) })),
-                id: n.id,
-              }));
-            }
-            sendResponse(msg.commandDetails, nodes);
+          let nodes = figma.currentPage.selection as any[];
+          if (msg.args.withMetadata) {
+            nodes = await Promise.all(nodes.map(async (n) => ({
+              documentId: figma.root.id,
+              pageId: figma.currentPage.id,
+              name: (await figma.getNodeByIdAsync(n.id)).name,
+              width: n.width,
+              height: n.height,
+              pluginData: n
+                .getPluginDataKeys()
+                .map((k) => ({ key: k, value: n.getPluginData(k) })),
+              id: n.id,
+            })));
           }
+          sendResponse(msg.commandDetails, nodes);
+
         }
         break;
       case "set-node-dimensions": {
         const { id, width, height } = args;
-        const node = figma.getNodeById(id) as RectangleNode;
+        const node = await figma.getNodeByIdAsync(id) as RectangleNode;
         if (width) {
           node.resize(width, node.height);
         }
@@ -184,6 +184,33 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
             ...figma.currentUser,
             fileKey: figma.fileKey,
           });
+        }
+        break;
+        case "export-scaled-png":
+        {
+          const nodes = figma.currentPage.selection;
+          if (!nodes.length) { sendResponse(msg.commandDetails, null); break; }
+          const bytes = await nodes[0].exportAsync({ format: "PNG", constraint: { type: "SCALE", value: 1 } });
+          const b64 = btoa(String.fromCharCode(...new Uint8Array(bytes)));
+          sendResponse(msg.commandDetails, `data:image/png;base64,${b64}`);
+        }
+        break;
+        case "export-scaled-svg":
+        {
+          const scale: number = args?.scale ?? 1;
+          const nodes = figma.currentPage.selection;
+          const results = await Promise.all(
+            nodes.map(async (node) => {
+              const bytes = await node.exportAsync({ format: "SVG" });
+              let raw = "";
+              for (let i = 0; i < bytes.length; i += 8192) {
+                raw += String.fromCharCode(...bytes.subarray(i, i + 8192));
+              }
+              const svg = toLaserSafeSvg(raw, scale);
+              return { name: node.name, svg };
+            })
+          );
+          sendResponse(msg.commandDetails, results);
         }
         break;
     }

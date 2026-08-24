@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router-dom";
+import { ChevronLeft } from "lucide-react";
 
 export const PageHeader = ({
   backLink,
@@ -26,20 +27,7 @@ export const PageHeader = ({
                 }
               }}
             >
-              <svg
-                width="12"
-                height="12"
-                viewBox="0 0 12 12"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  clip-rule="evenodd"
-                  d="M7.88838 12.0001C7.60433 12.0001 7.31979 11.8901 7.10243 11.6706L1.5 6.00013L7.10243 0.329625C7.53616 -0.109875 8.2406 -0.109875 8.67433 0.329625C9.10856 0.769125 9.10856 1.48113 8.67433 1.92063L4.6443 6.00013L8.67433 10.0796C9.10856 10.5191 9.10856 11.2311 8.67433 11.6706C8.45747 11.8901 8.17292 12.0001 7.88838 12.0001Z"
-                  fill="#111111"
-                />
-              </svg>
+              <ChevronLeft size={16} color="#111111" />
             </Link>
           )}
           <p className="font-semibold text-sm">{title}</p>

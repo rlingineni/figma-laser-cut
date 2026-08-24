@@ -24,7 +24,7 @@ const Page2 = () => {
           operation to do.
         </p>
 
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           <div className="w-full my-4 ">
             <p className="text-xs">r:255, g:0, b:0, w: .01</p>
             <button

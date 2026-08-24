@@ -1,4 +1,6 @@
 export type FigmaMessageCommands =
+  | "export-scaled-svg"
+  | "export-scaled-png"
   | "insert-rectangle"
   | "apply-stroke-style"
   | "get-selected-nodes"

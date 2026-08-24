@@ -37,7 +37,7 @@ const UnitsConverter = ({
    */
   const pixelToUnit = (pixel: number, unit: "cm" | "mm" | "inches"): number => {
     if (unit === "cm") {
-      return roundNum((pixel / BASE_UNIT) * 10);
+      return roundNum((pixel / BASE_UNIT) / 10);
     }
     if (unit === "mm") {
       return roundNum(pixel / BASE_UNIT);
