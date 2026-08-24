@@ -6,7 +6,9 @@ export type FigmaMessageCommands =
   | "get-selected-nodes"
   | "set-node-dimensions"
   | "get-current-user"
-  | "update-text";
+  | "update-text"
+  | "save-key"
+  | "get-key";
 
 export type FigmaEvents =
   | "on-selection-changed"

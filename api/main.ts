@@ -80,13 +80,22 @@ router.post("/room/:id", async (ctx) => {
   ctx.response.body = { filename, url: storage.getDownloadUrl(ctx.params.id, filename) };
 });
 
+router.delete("/room/:id/file/:filename", async (ctx) => {
+  if (!await storage.exists(ctx.params.id)) {
+    ctx.response.status = 404;
+    ctx.response.body = { error: "Room not found" };
+    return;
+  }
+  await storage.remove(ctx.params.id, ctx.params.filename);
+  ctx.response.body = { ok: true };
+});
+
 // local dev only — S3 rooms use presigned/public URLs directly
 if (IS_LOCAL) {
   router.get("/room/:id/file/:filename", async (ctx) => {
     try {
       const bytes = await Deno.readFile(`./api/.local-rooms/${ctx.params.id}/${ctx.params.filename}`);
       ctx.response.headers.set("Content-Type", "image/svg+xml");
-      ctx.response.headers.set("Content-Disposition", `attachment; filename="${ctx.params.filename}"`);
       ctx.response.body = bytes;
     } catch {
       ctx.response.status = 404;
@@ -99,7 +108,7 @@ const app = new Application();
 
 app.use(async (ctx, next) => {
   ctx.response.headers.set("Access-Control-Allow-Origin", "*");
-  ctx.response.headers.set("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  ctx.response.headers.set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   ctx.response.headers.set("Access-Control-Allow-Headers", "Content-Type");
 
   if (ctx.request.method === "OPTIONS") {

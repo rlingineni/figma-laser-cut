@@ -1,14 +1,27 @@
 import * as React from "react";
 import { FigmaHelper } from "../utils/figma";
 import { FigmaMessageCommands } from "../../types/commands";
-import { Download } from "lucide-react";
+import { Download, Copy, Check, Link, Loader2 } from "lucide-react";
+import { createRoom, uploadFile, BASE_URL } from "../utils/APIHelper";
 
+const ROOM_KEY = "cuts-room-id";
 const figmaHelper = new FigmaHelper([]);
+
+const Tooltip = ({ label, children }: { label: string; children: React.ReactNode }) => (
+  <div className="relative group">
+    {children}
+    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">
+      {label}
+    </span>
+  </div>
+);
 
 const Export = () => {
   const [selectedName, setSelectedName] = React.useState<string | null>(null);
   const [generatedLink, setGeneratedLink] = React.useState<string | undefined>(undefined);
   const [previewSvg, setPreviewSvg] = React.useState<string | null>(null);
+  const [isUploading, setIsUploading] = React.useState(false);
+  const [copied, setCopied] = React.useState(false);
 
   const fetchPreview = React.useCallback(async (hasSelection: boolean) => {
     if (!hasSelection) { setPreviewSvg(null); return; }
@@ -41,16 +54,47 @@ const Export = () => {
     onInitialize();
   }, []);
 
-  const exportScaledSvg = async () => {
-    const results: { name: string; svg: string }[] =
-      await figmaHelper.run("export-scaled-svg", { scale: 1 });
-    if (!results?.length) return;
-    results.forEach(({ name, svg }) => {
+  const downloadSvg = async () => {
+    const results: { name: string; svg: string }[] = await figmaHelper.run("export-scaled-svg", { scale: 1 });
+    results?.forEach(({ name, svg }) => {
       const a = document.createElement("a");
       a.href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       a.download = `${name}.svg`;
       a.click();
     });
+  };
+
+  const getShareLink = async (forceNewRoom = false) => {
+    if (!selectedName) return;
+    setIsUploading(true);
+    try {
+      let roomId: string = forceNewRoom ? null : await figmaHelper.run("get-key", { key: ROOM_KEY });
+      if (!roomId) {
+        const room = await createRoom();
+        roomId = room.roomId;
+        await figmaHelper.run("save-key", { key: ROOM_KEY, value: roomId });
+      }
+      const results: { name: string; svg: string }[] = await figmaHelper.run("export-scaled-svg", { scale: 1 });
+      if (results?.length) {
+        await uploadFile(roomId, results[0].name, results[0].svg);
+      }
+      setGeneratedLink(`${BASE_URL}/room/${roomId}`);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const copyLink = () => {
+    if (!generatedLink) return;
+    const el = document.createElement("textarea");
+    el.value = generatedLink;
+    el.style.cssText = "position:fixed;top:-9999px;left:-9999px;opacity:0";
+    document.body.appendChild(el);
+    el.select();
+    document.execCommand("copy");
+    document.body.removeChild(el);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -74,43 +118,43 @@ const Export = () => {
 
       <div className="px-3">
 
-        {selectedName && <div className="py-2">
+        {selectedName && <div className="py-2 mt-2">
 
             <div className="flex justify-between items-center h-5">
-              <p className="text-sm text-gray-700 mt-2 truncate">{selectedName ? selectedName : "---"}
+              <p className="text-sm text-gray-700 mt-1 truncate flex items-center gap-1">
+                {isUploading && <><Loader2 size={12} className="animate-spin shrink-0" /><span className="text-xs text-gray-400">uploading...</span></>}
+                {!isUploading && (selectedName ?? "---")}
               </p>
-              <button onClick={exportScaledSvg} disabled={!selectedName} className="disabled:opacity-40">
-                <Download size={16} />
-              </button>
-
-        
+              <div className="flex items-center gap-1">
+                <Tooltip label="Get Share link">
+                  <button onClick={() => getShareLink()} disabled={!selectedName || isUploading} className="disabled:opacity-40 bg-gray-200 p-1 rounded-sm">
+                    <Link size={16} />
+                  </button>
+                </Tooltip>
+                <Tooltip label="Download file">
+                  <button onClick={downloadSvg} disabled={!selectedName} className="disabled:opacity-40 bg-gray-200 p-1 rounded-sm">
+                    <Download size={16} />
+                  </button>
+                </Tooltip>
+              </div>
             </div>
-             <button
-          className={`text-xs mt-4 truncate ${selectedName ? "underline" : "text-gray-400 cursor-default"}`}
-          disabled={!selectedName}
-          onClick={() => { setGeneratedLink('link') }}
-        >
-          get share link
-        </button>
                  
         </div>}
 
-        {generatedLink && selectedName &&
+        {generatedLink && true &&
           <div>
-            <div className="bg-gray-100 rounded-md p-4 mt-4">
-  <p className="text-[12px] mb-3">access your uploads from another computer</p>
-       
-              <div className="bg-white px-2 py-1 my-2 rounded-sm">
-               <p className="text-xs underline">figcuts.com/link/raspberry-blue-straw</p>
+            <div className="bg-gray-100 rounded-md p-4">
+              <p className="text-[12px] mb-3">access your uploads from another computer</p>
+              <div className="bg-white px-2 py-1 my-2 rounded-sm flex items-center justify-between gap-1">
+                <a href={generatedLink} target="_blank" className="flex items-baseline gap-0.5 min-w-0">
+                  <span className="text-[10px] text-gray-400 shrink-0">{generatedLink.replace(/^https?:\/\//, "").replace(/\/[^\/]+$/, "/")}</span>
+                  <span className="text-xs font-semibold truncate">{generatedLink.split("/").pop()}</span>
+                </a>
+                <button onClick={copyLink} title="Copy link" className="shrink-0 text-gray-400 hover:text-gray-700 ml-1">
+                  {copied ? <Check size={12} className="text-green-500" /> : <Copy size={12} />}
+                </button>
               </div>
-  
-
-            
-
-
             </div>
-
-
           </div>
         }
 

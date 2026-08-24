@@ -213,6 +213,13 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
           sendResponse(msg.commandDetails, results);
         }
         break;
+      case "get-key":
+        sendResponse(msg.commandDetails, await figma.clientStorage.getAsync(args.key));
+        break;
+      case "save-key":
+        await figma.clientStorage.setAsync(args.key, args.value ?? null);
+        sendResponse(msg.commandDetails, true);
+        break;
     }
   } catch (ex) {
     console.log(ex);

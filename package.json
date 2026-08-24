@@ -6,7 +6,7 @@
   "author": "Ravi Lingineni (rlingineni@live.com)",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"rspack build --config rspack.config.js --watch\" \"yarn:watch-css\"",
+    "dev": "NODE_ENV=development concurrently \"rspack build --config rspack.config.js --watch\" \"yarn:watch-css\"",
     "build": "npm run build-css && NODE_ENV=production rspack build --config rspack.config.js",
     "build-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css",
     "watch-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css --watch",
