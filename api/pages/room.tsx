@@ -3,13 +3,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import type { FileEntry } from "../storage.ts";
 
-function ImgIcon() {
+function ImgIcon({ url }: { url: string }) {
   return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="none" viewBox="0 0 24 24" strokeWidth="1.2" stroke="#555">
-      <rect x="3" y="3" width="18" height="18" rx="2" fill="#f0f0f0" stroke="#bbb" />
-      <circle cx="8.5" cy="8.5" r="1.5" fill="#bbb" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16l5-5 4 4 3-3 6 6" />
-    </svg>
+    <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+      <img src={url} className="w-full h-full object-contain p-1" alt="" />
+    </div>
   );
 }
 
@@ -37,24 +35,33 @@ function TrashIcon() {
   );
 }
 
-function FileRow({ file, first }: { file: FileEntry; first: boolean }) {
+function FileRow({ file }: { file: FileEntry }) {
   return (
-    <div className={`file-row-item flex items-center justify-between px-3 py-2.5 min-h-[64px] bg-white mx-1.5 my-1.5 ${!first ? "border-t border-gray-200" : "rounded-xl"}`}>
+    <div className="file-row-item flex items-center justify-between px-3 py-2.5 min-h-[64px] bg-white mx-1.5 my-1.5 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-gray-200">
       <div className="flex items-center gap-3 overflow-hidden">
-        <ImgIcon />
+        <ImgIcon url={file.url} />
         <span className="text-sm italic truncate">{file.filename}</span>
       </div>
       <div className="flex gap-1.5 shrink-0">
         {/* data-url wired to printFile / deleteFile by inline script */}
-        <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer" data-url={file.url} title="Print">
-          <PrintIcon />
-        </button>
-        <a className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600" href={file.url} download={file.filename} title="Download">
-          <DownloadIcon />
-        </a>
-        <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-500 cursor-pointer" data-delete-url={file.url} title="Delete">
-          <TrashIcon />
-        </button>
+        <div className="relative group">
+          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer" data-url={file.url}>
+            <PrintIcon />
+          </button>
+          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Print</span>
+        </div>
+        <div className="relative group">
+          <a className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600" href={file.url} download={file.filename}>
+            <DownloadIcon />
+          </a>
+          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
+        </div>
+        <div className="relative group">
+          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-500 cursor-pointer" data-delete-url={file.url}>
+            <TrashIcon />
+          </button>
+          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Delete</span>
+        </div>
       </div>
     </div>
   );
@@ -82,7 +89,7 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
             {files.length === 0 && emptyCount === 5
               ? <p className="text-center text-gray-400 text-sm py-8">No files uploaded yet</p>
               : <>
-                  {files.map((f, i) => <FileRow key={f.filename} file={f} first={i === 0} />)}
+                  {files.map((f) => <FileRow key={f.filename} file={f} />)}
                   {Array.from({ length: emptyCount }).map((_, i) => (
                     <div key={i} className="min-h-[64px] bg-gray-100 border-b border-gray-200 last:border-b-0" />
                   ))}
@@ -101,17 +108,15 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
           });
           document.querySelectorAll('button[data-url]').forEach(function(btn) {
             btn.onclick = function() {
-              fetch(btn.dataset.url)
-                .then(function(r) { return r.text(); })
-                .then(function(svg) {
-                  var blob = new Blob(
-                    ['<!DOCTYPE html><html><body style="margin:0">' + svg + '</body></html>'],
-                    { type: 'text/html' }
-                  );
-                  var url = URL.createObjectURL(blob);
-                  var w = window.open(url);
-                  w.onload = function() { w.print(); URL.revokeObjectURL(url); };
-                });
+              var svgUrl = btn.dataset.url;
+              var iframe = document.createElement('iframe');
+              iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;visibility:hidden';
+              document.body.appendChild(iframe);
+              var doc = iframe.contentDocument || iframe.contentWindow.document;
+              doc.open();
+              doc.write('<!DOCTYPE html><html><head><style>@page{margin:0}body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}</style></head><body><img src="' + svgUrl + '" onload="window.print()"></body></html>');
+              doc.close();
+              setTimeout(function() { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 4000);
             };
           });
         `}} />

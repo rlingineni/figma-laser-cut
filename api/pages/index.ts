@@ -15,7 +15,7 @@ export function indexPage(): string {
 <body>
   <header>
     <nav>
-      <a href="/"><b><i>FigCuts</i></b></a>
+      <a href="/"><b><i>FigCNC</i></b></a>
     </nav>
     <h1>Share Laser Cut Files from Figma</h1>
     <p>Export your Figma designs as laser-ready SVGs and share them with a simple link.<br/>

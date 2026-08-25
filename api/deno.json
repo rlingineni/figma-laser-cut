@@ -11,5 +11,19 @@
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "types": ["npm:@types/react@^18"]
+  },
+  "deploy": {
+    "org": "rlingineni",
+    "app": "figcuts-api"
   }
 }
+
+
+
+
+
+
+
+
+
+

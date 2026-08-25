@@ -37,7 +37,7 @@ router.get("/room/:id", async (ctx) => {
     return;
   }
   const files = (await storage.list(ctx.params.id))
-    .sort((a, b) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime());
+    .sort((a: { expiresAt: string }, b: { expiresAt: string }) => new Date(b.expiresAt).getTime() - new Date(a.expiresAt).getTime());
   // serve HTML for browsers, JSON for API clients
   if (ctx.request.headers.get("accept")?.includes("text/html")) {
     html(ctx, roomPage(ctx.params.id, files));

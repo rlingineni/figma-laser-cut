@@ -6,11 +6,12 @@
   "author": "Ravi Lingineni (rlingineni@live.com)",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development concurrently \"rspack build --config rspack.config.js --watch\" \"yarn:watch-css\"",
+    "dev": "NODE_ENV=production concurrently \"rspack build --config rspack.config.js --watch\" \"yarn:watch-css\"",
     "build": "npm run build-css && NODE_ENV=production rspack build --config rspack.config.js",
     "build-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css",
     "watch-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css --watch",
-    "api:dev": "IS_LOCAL=true deno run --allow-net --allow-read --allow-write --allow-env api/main.ts",
+    "api:dev": "IS_LOCAL=true deno run --allow-net --allow-read --allow-write --allow-env --watch api/main.ts",
+    "api:deploy": "cd api && deno deploy --prod",
     "dev:full": "concurrently \"yarn:dev\" \"yarn:api:dev\""
   },
   "dependencies": {

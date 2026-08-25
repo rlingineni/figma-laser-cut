@@ -1,40 +1,29 @@
+import {
+  S3Client,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+  DeleteObjectCommand,
+  GetObjectCommand,
+} from "npm:@aws-sdk/client-s3";
+import { getSignedUrl } from "npm:@aws-sdk/s3-request-presigner";
 import type { FileEntry, StorageAdapter } from "../storage.ts";
 
-const BUCKET = "figcuts";
+const BUCKET = "figcnc";
 const EXPIRY_MS = 24 * 60 * 60 * 1000;
 
+const s3 = new S3Client({
+  region: Deno.env.get("AWS_REGION") ?? "us-east-1",
+});
+
 export class S3Storage implements StorageAdapter {
-  private client: any;
-
-  constructor() {
-    this.client = null; // initialised lazily via getClient()
-  }
-
-  private async getClient() {
-    if (this.client) return this.client;
-    // @ts-ignore
-    const { S3Client } = await import("npm:@aws-sdk/client-s3");
-    this.client = new S3Client({
-      region: Deno.env.get("AWS_REGION") ?? "us-east-1",
-      credentials: {
-        accessKeyId: Deno.env.get("AWS_ACCESS_KEY_ID") ?? "",
-        secretAccessKey: Deno.env.get("AWS_SECRET_ACCESS_KEY") ?? "",
-      },
-    });
-    return this.client;
-  }
-
   private key(roomId: string, filename: string): string {
     return `rooms/${roomId}/${filename}`;
   }
 
   async save(roomId: string, filename: string, svgBytes: Uint8Array): Promise<void> {
-    // @ts-ignore
-    const { PutObjectCommand } = await import("npm:@aws-sdk/client-s3");
-    const client = await this.getClient();
     const expiresAt = new Date(Date.now() + EXPIRY_MS);
-
-    await client.send(
+    await s3.send(
       new PutObjectCommand({
         Bucket: BUCKET,
         Key: this.key(roomId, filename),
@@ -47,28 +36,21 @@ export class S3Storage implements StorageAdapter {
   }
 
   async exists(roomId: string): Promise<boolean> {
-    // @ts-ignore
-    const { ListObjectsV2Command } = await import("npm:@aws-sdk/client-s3");
-    const client = await this.getClient();
-    const result = await client.send(
+    const result = await s3.send(
       new ListObjectsV2Command({ Bucket: BUCKET, Prefix: `rooms/${roomId}/`, MaxKeys: 1 }),
     );
     return (result.Contents?.length ?? 0) > 0;
   }
 
   async list(roomId: string): Promise<FileEntry[]> {
-    // @ts-ignore
-    const { ListObjectsV2Command, HeadObjectCommand } = await import("npm:@aws-sdk/client-s3");
-    const client = await this.getClient();
     const now = Date.now();
-
-    const listed = await client.send(
+    const listed = await s3.send(
       new ListObjectsV2Command({ Bucket: BUCKET, Prefix: `rooms/${roomId}/` }),
     );
 
     const entries: FileEntry[] = [];
     for (const obj of listed.Contents ?? []) {
-      const head = await client.send(
+      const head = await s3.send(
         new HeadObjectCommand({ Bucket: BUCKET, Key: obj.Key }),
       );
       const expiresAt = head.Metadata?.["expires-at"];
@@ -77,7 +59,7 @@ export class S3Storage implements StorageAdapter {
       const filename = obj.Key!.split("/").pop()!;
       entries.push({
         filename,
-        url: this.getDownloadUrl(roomId, filename),
+        url: await this.getDownloadUrl(roomId, filename),
         expiresAt: expiresAt ?? "",
       });
     }
@@ -85,7 +67,13 @@ export class S3Storage implements StorageAdapter {
     return entries;
   }
 
-  getDownloadUrl(roomId: string, filename: string): string {
-    return `https://${BUCKET}.s3.amazonaws.com/${this.key(roomId, filename)}`;
+  async getDownloadUrl(roomId: string, filename: string): Promise<string> {
+    // signed URL valid for the full 24-hour file lifetime
+    return getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: this.key(roomId, filename) }), { expiresIn: EXPIRY_MS / 1000 });
+  }
+
+  async remove(roomId: string, filename: string): Promise<void> {
+    await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: this.key(roomId, filename) }));
   }
 }
+

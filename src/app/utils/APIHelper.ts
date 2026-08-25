@@ -1,6 +1,6 @@
 // @ts-expect-error
 const IS_DEV = process.env.NODE_ENV !== "production";
-const BASE_URL = IS_DEV ? "http://localhost:8000" : "https://figcuts.deno.dev";
+const BASE_URL = IS_DEV ? "http://localhost:8000" : "https://figcuts-api.rlingineni.deno.net";
 
 export interface RoomInfo {
   roomId: string;
