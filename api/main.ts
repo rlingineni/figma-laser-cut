@@ -3,7 +3,7 @@ import { generateRoomId } from "./utils/generateRoomId.ts";
 import type { StorageAdapter } from "./storage.ts";
 import { LocalDiskStorage } from "./utils/diskStorage.ts";
 import { S3Storage } from "./utils/s3Storage.ts";
-import { roomPage } from "./pages/room.tsx";
+import { roomPage, notFoundPage } from "./pages/room.tsx";
 import { indexPage } from "./pages/index.ts";
 
 const IS_LOCAL = Deno.env.get("IS_LOCAL") === "true";
@@ -32,8 +32,13 @@ router.post("/room", (ctx) => {
 
 router.get("/room/:id", async (ctx) => {
   if (!await storage.exists(ctx.params.id)) {
-    ctx.response.status = 404;
-    ctx.response.body = { error: "Room not found" };
+    if (ctx.request.headers.get("accept")?.includes("text/html")) {
+      ctx.response.status = 404;
+      html(ctx, notFoundPage(ctx.params.id));
+    } else {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Room not found" };
+    }
     return;
   }
   const files = (await storage.list(ctx.params.id))

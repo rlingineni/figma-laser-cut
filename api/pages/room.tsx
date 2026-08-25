@@ -35,7 +35,8 @@ function TrashIcon() {
   );
 }
 
-function FileRow({ file }: { file: FileEntry }) {
+function FileRow({ file, roomId }: { file: FileEntry; roomId: string }) {
+  const deleteUrl = `/room/${roomId}/file/${encodeURIComponent(file.filename)}`;
   return (
     <div className="file-row-item flex items-center justify-between px-3 py-2.5 min-h-[64px] bg-white mx-1.5 my-1.5 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-gray-200">
       <div className="flex items-center gap-3 overflow-hidden">
@@ -57,7 +58,7 @@ function FileRow({ file }: { file: FileEntry }) {
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
         </div>
         <div className="relative group">
-          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-500 cursor-pointer" data-delete-url={file.url}>
+          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-red-200 bg-red-50 hover:bg-red-100 text-red-500 cursor-pointer" data-delete-url={deleteUrl}>
             <TrashIcon />
           </button>
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Delete</span>
@@ -89,7 +90,7 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
             {files.length === 0 && emptyCount === 5
               ? <p className="text-center text-gray-400 text-sm py-8">No files uploaded yet</p>
               : <>
-                  {files.map((f) => <FileRow key={f.filename} file={f} />)}
+                  {files.map((f) => <FileRow key={f.filename} file={f} roomId={roomId} />)}
                   {Array.from({ length: emptyCount }).map((_, i) => (
                     <div key={i} className="min-h-[64px] bg-gray-100 border-b border-gray-200 last:border-b-0" />
                   ))}
@@ -120,6 +121,26 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
             };
           });
         `}} />
+      </body>
+    </html>
+  );
+}
+
+export function notFoundPage(roomId: string): string {
+  return "<!DOCTYPE html>" + renderToStaticMarkup(
+    <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>{`FigCuts — Room Not Found`}</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+      </head>
+      <body className="bg-white text-gray-900">
+        <div className="min-h-screen flex flex-col items-center justify-center gap-2">
+          <h1 className="text-2xl font-bold italic">FigCuts</h1>
+          <p className="text-sm text-gray-500">Room <span className="font-mono">{roomId}</span> doesn't exist or has expired.</p>
+          <a href="/" className="mt-4 text-xs underline text-gray-400">Go home</a>
+        </div>
       </body>
     </html>
   );
