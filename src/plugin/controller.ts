@@ -1,6 +1,10 @@
 import { FigmaEvents, FigmaMessageCommands } from "../types/commands";
 import { toLaserSafeSvg } from "./svgUtils";
-import { captureTemplate, overlayTemplate } from "./overlay";
+import {
+  findTemplateNode,
+  exportTemplateImage,
+  applyDrillHoles,
+} from "./overlay";
 
 interface FigmaCommandDetails {
   command: FigmaMessageCommands | FigmaEvents;
@@ -187,22 +191,27 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
           });
         }
         break;
-      case "capture-drill-template":
+      case "get-drill-template-image":
         {
-          const node = figma.currentPage.selection[0] ?? null;
-          sendResponse(
-            msg.commandDetails,
-            captureTemplate(node ? node.id : "", node)
-          );
+          const templateNode = findTemplateNode(figma.currentPage.selection);
+          if (!templateNode) {
+            sendResponse(msg.commandDetails, { noTemplate: true });
+            break;
+          }
+          const baseLayerCount = figma.currentPage.selection.filter(
+            (n) => n.id !== templateNode.id
+          ).length;
+          const image = await exportTemplateImage(templateNode);
+          sendResponse(msg.commandDetails, { ...image, baseLayerCount });
         }
         break;
-      case "overlay-template":
+      case "apply-drill-holes":
         {
           const templateNode = await figma.getNodeByIdAsync(args.templateId);
           const targets = figma.currentPage.selection.filter(
             (n) => n.id !== args.templateId
           );
-          const result = overlayTemplate(templateNode, targets);
+          const result = applyDrillHoles(templateNode, args.holes, targets);
           sendResponse(msg.commandDetails, result);
         }
         break;

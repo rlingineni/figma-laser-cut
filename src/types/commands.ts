@@ -7,8 +7,8 @@ export type FigmaMessageCommands =
   | "set-node-dimensions"
   | "get-current-user"
   | "update-text"
-  | "capture-drill-template"
-  | "overlay-template"
+  | "get-drill-template-image"
+  | "apply-drill-holes"
   | "save-key"
   | "get-key";
 
