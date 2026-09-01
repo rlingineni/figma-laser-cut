@@ -52,9 +52,9 @@ function FileRow({ file, roomId }: { file: FileEntry; roomId: string }) {
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Print</span>
         </div>
         <div className="relative group">
-          <a className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600" href={file.url} download={file.filename}>
+          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer" data-download-url={file.url} data-download-name={file.filename}>
             <DownloadIcon />
-          </a>
+          </button>
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
         </div>
         <div className="relative group">
@@ -99,6 +99,11 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
           </div>
         </div>
         <script dangerouslySetInnerHTML={{ __html: `
+          document.querySelectorAll('button[data-download-url]').forEach(function(btn) {
+            btn.onclick = function() {
+              window.open(btn.dataset.downloadUrl, '_blank');
+            };
+          });
           document.querySelectorAll('button[data-delete-url]').forEach(function(btn) {
             btn.onclick = function() {
               var url = btn.dataset.deleteUrl;
@@ -109,15 +114,7 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
           });
           document.querySelectorAll('button[data-url]').forEach(function(btn) {
             btn.onclick = function() {
-              var svgUrl = btn.dataset.url;
-              var iframe = document.createElement('iframe');
-              iframe.style.cssText = 'position:fixed;width:0;height:0;border:0;visibility:hidden';
-              document.body.appendChild(iframe);
-              var doc = iframe.contentDocument || iframe.contentWindow.document;
-              doc.open();
-              doc.write('<!DOCTYPE html><html><head><style>@page{margin:0}body{margin:0;display:flex;align-items:center;justify-content:center;min-height:100vh}img{max-width:100%;max-height:100vh;object-fit:contain}</style></head><body><img src="' + svgUrl + '" onload="window.print()"></body></html>');
-              doc.close();
-              setTimeout(function() { if (document.body.contains(iframe)) document.body.removeChild(iframe); }, 4000);
+              window.open(btn.dataset.url, '_blank');
             };
           });
         `}} />

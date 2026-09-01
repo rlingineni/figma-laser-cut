@@ -10,7 +10,7 @@ function App() {
   const router = createMemoryRouter([
     {
       path: "/",
-      element: <Navigate to="/export" />,
+      element: <Navigate to="/cuts" />,
     },
     {
       path: "/spacer",
@@ -43,7 +43,7 @@ function App() {
           <Export />
         </PageWrapper>
       ),
-    },
+    }
   ]);
 
   return <RouterProvider router={router} />;

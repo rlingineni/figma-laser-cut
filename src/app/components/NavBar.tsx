@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import cx from "classnames";
 import * as React from "react";
-import { Ruler, Square, Scissors, Download } from "lucide-react";
+import { Ruler, Square, Scissors, Download, Drill } from "lucide-react";
 
 const NavBar = () => {
   const tabs = [
@@ -11,7 +11,7 @@ const NavBar = () => {
     },
     {
       name: "Spacer",
-      icon: <Square size={20} />,
+      icon: <Square size={20} fill="currentColor" />,
     },
     {
       name: "Cuts",
@@ -20,7 +20,7 @@ const NavBar = () => {
     {
       name: "Export",
       icon: <Download size={20} />,
-    },
+    }
   ];
 
   const location = useLocation();

@@ -1,5 +1,6 @@
 import { FigmaEvents, FigmaMessageCommands } from "../types/commands";
 import { toLaserSafeSvg } from "./svgUtils";
+import { captureTemplate, overlayTemplate } from "./overlay";
 
 interface FigmaCommandDetails {
   command: FigmaMessageCommands | FigmaEvents;
@@ -184,6 +185,25 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
             ...figma.currentUser,
             fileKey: figma.fileKey,
           });
+        }
+        break;
+      case "capture-drill-template":
+        {
+          const node = figma.currentPage.selection[0] ?? null;
+          sendResponse(
+            msg.commandDetails,
+            captureTemplate(node ? node.id : "", node)
+          );
+        }
+        break;
+      case "overlay-template":
+        {
+          const templateNode = await figma.getNodeByIdAsync(args.templateId);
+          const targets = figma.currentPage.selection.filter(
+            (n) => n.id !== args.templateId
+          );
+          const result = overlayTemplate(templateNode, targets);
+          sendResponse(msg.commandDetails, result);
         }
         break;
         case "export-scaled-png":
