@@ -86,7 +86,7 @@ const Page2 = () => {
       ? `, ${result.unmatched} hole(s) unmatched`
       : "";
     setDrillStatus(
-      `Punched ${result?.punched ?? 0} node(s), skipped ${result?.skipped ?? 0
+      `Punched ${result?.punched ?? 0} hole(s), skipped ${result?.skipped ?? 0
       }${unmatched}.`
     );
   };
@@ -114,7 +114,7 @@ const Page2 = () => {
   return (
     <div className="px-3 pt-3">
       <Tabs
-        tabs={["Strokes", "Drills"]}
+        tabs={["Strokes", "Holes"]}
         selected={selectedTab}
         onSelect={setSelectedTab}
       />
@@ -189,11 +189,11 @@ const Page2 = () => {
 
         </div>
       )}
-      {selectedTab === "Drills" && (
+      {selectedTab === "Holes" && (
         <div className="mt-3">
 
           <p className="text-xs">
-            Drills holes through the underlying layers. Use holes from one layer as a template and drills through the others
+            Use holes in one layer to drill through the others
           </p>
 
            <p className="mt-3 text-[8px] text-gray-500">Example Image</p>
@@ -216,7 +216,7 @@ const Page2 = () => {
               {checkingTemplate && (
                 <Loader2 size={14} className="animate-spin" />
               )}
-              Apply Drills
+              Apply Holes
             </button>
 
             <p className="text-xs text-gray-500 mt-1">{getPreviewText()}</p>
