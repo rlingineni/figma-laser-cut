@@ -101,11 +101,10 @@ const Page2 = () => {
       case "no-holes":
         return "No holes detected in the template";
       case "ready":
-        return `${holeCount} hole${holeCount === 1 ? "" : "s"} detected${
-          baseLayerCount > 0
+        return `${holeCount} hole${holeCount === 1 ? "" : "s"} detected${baseLayerCount > 0
             ? ` | ${baseLayerCount} base layer${baseLayerCount === 1 ? "" : "s"}`
             : ""
-        }`;
+          }`;
     }
   };
 
@@ -196,10 +195,10 @@ const Page2 = () => {
             Use holes in one layer to drill through the others
           </p>
 
-           <p className="mt-3 text-[8px] text-gray-500">Example Image</p>
+          <p className="mt-3 text-[8px] text-gray-500">Example Image</p>
 
           <div className="relative">
-           
+
             <img
               src={explainImage}
               className="max-h-full max-w-full object-contain"
@@ -216,7 +215,7 @@ const Page2 = () => {
               {checkingTemplate && (
                 <Loader2 size={14} className="animate-spin" />
               )}
-              Apply Holes
+              Drill Holes
             </button>
 
             <p className="text-xs text-gray-500 mt-1">{getPreviewText()}</p>
