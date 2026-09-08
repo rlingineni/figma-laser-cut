@@ -39,6 +39,7 @@ export class LocalDiskStorage implements StorageAdapter {
         entries.push({
           filename: entry.name,
           url: await this.getDownloadUrl(roomId, entry.name),
+          downloadUrl: await this.getDownloadUrl(roomId, entry.name, true),
           expiresAt: new Date(mtime + EXPIRY_MS).toISOString(),
         });
       }
@@ -61,7 +62,8 @@ export class LocalDiskStorage implements StorageAdapter {
     await Deno.remove(`${this.roomDir(roomId)}/${filename}`);
   }
 
-  async getDownloadUrl(_roomId: string, filename: string): Promise<string> {
-    return `/room/${_roomId}/file/${encodeURIComponent(filename)}`;
+  async getDownloadUrl(_roomId: string, filename: string, asAttachment = false): Promise<string> {
+    const base = `/room/${_roomId}/file/${encodeURIComponent(filename)}`;
+    return asAttachment ? `${base}?download=1` : base;
   }
 }

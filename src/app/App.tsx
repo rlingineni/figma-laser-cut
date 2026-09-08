@@ -10,7 +10,7 @@ function App() {
   const router = createMemoryRouter([
     {
       path: "/",
-      element: <Navigate to="/cuts" />,
+      element: <Navigate to="/export" />,
     },
     {
       path: "/spacer",

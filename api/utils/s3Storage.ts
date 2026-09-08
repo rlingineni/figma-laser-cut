@@ -60,6 +60,7 @@ export class S3Storage implements StorageAdapter {
       entries.push({
         filename,
         url: await this.getDownloadUrl(roomId, filename),
+        downloadUrl: await this.getDownloadUrl(roomId, filename, true),
         expiresAt: expiresAt ?? "",
       });
     }
@@ -67,9 +68,18 @@ export class S3Storage implements StorageAdapter {
     return entries;
   }
 
-  async getDownloadUrl(roomId: string, filename: string): Promise<string> {
+  async getDownloadUrl(roomId: string, filename: string, asAttachment = false): Promise<string> {
     // signed URL valid for the full 24-hour file lifetime
-    return getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: this.key(roomId, filename) }), { expiresIn: EXPIRY_MS / 1000 });
+    return getSignedUrl(
+      s3,
+      new GetObjectCommand({
+        Bucket: BUCKET,
+        Key: this.key(roomId, filename),
+        // force the browser to download (stays on page, no CORS) instead of navigating
+        ...(asAttachment ? { ResponseContentDisposition: `attachment; filename="${filename}"` } : {}),
+      }),
+      { expiresIn: EXPIRY_MS / 1000 },
+    );
   }
 
   async remove(roomId: string, filename: string): Promise<void> {

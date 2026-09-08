@@ -1,6 +1,7 @@
 export interface FileEntry {
   filename: string;
   url: string;
+  downloadUrl: string;
   expiresAt: string;
 }
 
@@ -9,6 +10,6 @@ export interface StorageAdapter {
   list(roomId: string): Promise<FileEntry[]>;
   exists(roomId: string): Promise<boolean>;
   remove(roomId: string, filename: string): Promise<void>;
-  getDownloadUrl(roomId: string, filename: string): Promise<string>;
+  getDownloadUrl(roomId: string, filename: string, asAttachment?: boolean): Promise<string>;
 }
 

@@ -101,6 +101,9 @@ if (IS_LOCAL) {
     try {
       const bytes = await Deno.readFile(`./api/.local-rooms/${ctx.params.id}/${ctx.params.filename}`);
       ctx.response.headers.set("Content-Type", "image/svg+xml");
+      if (ctx.request.url.searchParams.has("download")) {
+        ctx.response.headers.set("Content-Disposition", `attachment; filename="${ctx.params.filename}"`);
+      }
       ctx.response.body = bytes;
     } catch {
       ctx.response.status = 404;

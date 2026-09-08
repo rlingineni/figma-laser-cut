@@ -52,7 +52,7 @@ function FileRow({ file, roomId }: { file: FileEntry; roomId: string }) {
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Print</span>
         </div>
         <div className="relative group">
-          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer" data-download-url={file.url} data-download-name={file.filename}>
+          <button type="button" className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-gray-100 hover:bg-gray-200 text-gray-600 cursor-pointer" data-download-url={file.downloadUrl} data-download-name={file.filename}>
             <DownloadIcon />
           </button>
           <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">Download</span>
@@ -101,7 +101,8 @@ function RoomPage({ roomId, files }: { roomId: string; files: FileEntry[] }) {
         <script dangerouslySetInnerHTML={{ __html: `
           document.querySelectorAll('button[data-download-url]').forEach(function(btn) {
             btn.onclick = function() {
-              window.open(btn.dataset.downloadUrl, '_blank');
+              // presigned URL carries Content-Disposition: attachment, so this downloads in-page
+              window.location.href = btn.dataset.downloadUrl;
             };
           });
           document.querySelectorAll('button[data-delete-url]').forEach(function(btn) {
