@@ -5,6 +5,7 @@ import {
   exportTemplateImage,
   applyDrillHoles,
 } from "./overlay";
+import { nodesToDxf, analyzeDxfReadiness } from "./dxfUtils";
 
 interface FigmaCommandDetails {
   command: FigmaMessageCommands | FigmaEvents;
@@ -240,6 +241,20 @@ figma.ui.onmessage = async (msg: FigmaUIMessage) => {
             })
           );
           sendResponse(msg.commandDetails, results);
+        }
+        break;
+        case "export-dxf":
+        {
+          const scale: number = args?.scale ?? 1;
+          const nodes = figma.currentPage.selection;
+          if (!nodes.length) { sendResponse(msg.commandDetails, null); break; }
+          const dxf = nodesToDxf(nodes, scale);
+          sendResponse(msg.commandDetails, [{ name: nodes[0].name, dxf }]);
+        }
+        break;
+        case "is-dxf-available":
+        {
+          sendResponse(msg.commandDetails, analyzeDxfReadiness(figma.currentPage.selection));
         }
         break;
       case "get-key":

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { FigmaHelper } from "../utils/figma";
 import { FigmaMessageCommands } from "../../types/commands";
-import { Download, Copy, Check, Link, Loader2 } from "lucide-react";
+import { Download, Copy, Check, Link, Loader2, Computer } from "lucide-react";
 import { createRoom, uploadFile, BASE_URL } from "../utils/APIHelper";
 
 const ROOM_KEY = "cuts-room-id";
@@ -10,7 +10,7 @@ const figmaHelper = new FigmaHelper([]);
 const Tooltip = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div className="relative group">
     {children}
-    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 whitespace-nowrap rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">
+    <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 w-max max-w-[220px] whitespace-normal text-center rounded bg-gray-800 px-1.5 py-0.5 text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity">
       {label}
     </span>
   </div>
@@ -22,11 +22,20 @@ const Export = () => {
   const [previewSvg, setPreviewSvg] = React.useState<string | null>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [copied, setCopied] = React.useState(false);
+  const [dxfAvailable, setDxfAvailable] = React.useState(false);
+  const [dxfNote, setDxfNote] = React.useState("Download file");
 
   const fetchPreview = React.useCallback(async (hasSelection: boolean) => {
     if (!hasSelection) { setPreviewSvg(null); return; }
     const dataUrl: string | null = await figmaHelper.run("export-scaled-png");
     setPreviewSvg(dataUrl ?? null);
+  }, []);
+
+  const fetchDxfAvailability = React.useCallback(async (hasSelection: boolean) => {
+    if (!hasSelection) { setDxfAvailable(false); return; }
+    const readiness = await figmaHelper.run("is-dxf-available");
+    setDxfAvailable(!!readiness?.available);
+    setDxfNote(readiness?.note ?? "Download file");
   }, []);
 
   const figmaCommands = [
@@ -38,7 +47,8 @@ const Export = () => {
         setSelectedName(single ? nodes[0].name : null);
         setGeneratedLink('');
         await fetchPreview(single);
-      }, [fetchPreview]),
+        await fetchDxfAvailability(single);
+      }, [fetchPreview, fetchDxfAvailability]),
     },
   ];
 
@@ -48,6 +58,7 @@ const Export = () => {
     const single = nodes?.length === 1;
     setSelectedName(single ? nodes[0].name : null);
     await fetchPreview(single);
+    await fetchDxfAvailability(single);
   };
 
   React.useEffect(() => {
@@ -60,6 +71,16 @@ const Export = () => {
       const a = document.createElement("a");
       a.href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
       a.download = `${name}.svg`;
+      a.click();
+    });
+  };
+
+  const downloadDxf = async () => {
+    const results: { name: string; dxf: string }[] = await figmaHelper.run("export-dxf", { scale: 1 });
+    results?.forEach(({ name, dxf }) => {
+      const a = document.createElement("a");
+      a.href = `data:application/dxf;charset=utf-8,${encodeURIComponent(dxf)}`;
+      a.download = `${name}.dxf`;
       a.click();
     });
   };
@@ -104,7 +125,6 @@ const Export = () => {
         <p className="text-xs my-2">
           Download files with scaled svg dimensions for compatibility
         </p>
-
         <div
           className="relative pattern-dots pattern-blue-500 pattern-bg-white pattern-size-2 w-full h-48 rounded-md overflow-hidden flex items-center justify-center mt-2"
         >
@@ -119,26 +139,35 @@ const Export = () => {
       <div className="px-3">
 
         {selectedName && <div className="py-2 mt-2">
+          <div className="flex justify-between items-center h-5">
+            <p className="text-sm text-gray-700 mt-1 truncate flex items-center gap-1">
+              {isUploading && <><Loader2 size={12} className="animate-spin shrink-0" /><span className="text-xs text-gray-400">uploading...</span></>}
+              {!isUploading && (selectedName ?? "---")}
+            </p>
+            <div className="flex items-center gap-1">
 
-            <div className="flex justify-between items-center h-5">
-              <p className="text-sm text-gray-700 mt-1 truncate flex items-center gap-1">
-                {isUploading && <><Loader2 size={12} className="animate-spin shrink-0" /><span className="text-xs text-gray-400">uploading...</span></>}
-                {!isUploading && (selectedName ?? "---")}
-              </p>
-              <div className="flex items-center gap-1">
-                <Tooltip label="Get Share link">
-                  <button onClick={() => getShareLink()} disabled={!selectedName || isUploading} className="disabled:opacity-40 bg-gray-200 p-1 rounded-sm">
-                    <Link size={16} />
-                  </button>
-                </Tooltip>
-                <Tooltip label="Download file">
-                  <button onClick={downloadSvg} disabled={!selectedName} className="disabled:opacity-40 bg-gray-200 p-1 rounded-sm">
-                    <Download size={16} />
-                  </button>
-                </Tooltip>
-              </div>
             </div>
-                 
+          </div>
+          <div className="flex gap-2 mt-4">
+            <Tooltip label="Download file">
+              <button onClick={downloadSvg} disabled={!selectedName} className="disabled:opacity-40  p-1 border border-gray-200 rounded-sm flex">
+                <p className="text-xs">SVG&nbsp;</p>
+                <Download size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip label={dxfAvailable ? "Download file" : dxfNote}>
+              <button onClick={downloadDxf} disabled={!selectedName || !dxfAvailable} className="disabled:opacity-40 border border-gray-200 p-1 rounded-sm flex">
+                <p className="text-xs">DXF&nbsp;</p>
+                <Download size={16} />
+              </button>
+            </Tooltip>
+            <Tooltip label="Share link">
+              <button onClick={() => getShareLink()} disabled={!selectedName || isUploading} className="disabled:opacity-40 border border-gray-200 bg-gray-200 p-1 rounded-sm flex">
+                <p className="text-xs">Share Link&nbsp;</p>
+                <Computer size={14} />
+              </button>
+            </Tooltip>
+          </div>
         </div>}
 
         {generatedLink && true &&

@@ -22,7 +22,7 @@ const Tabs = ({ tabs, selected, onSelect }: TabsProps) => {
                 "border-blue-200 text-black font-medium": selected === tab,
                 "border-transparent text-gray-500 hover:text-black":
                   selected !== tab,
-                "pl-2": index > 1
+                
               }
             )}
           >

@@ -113,7 +113,7 @@ const Page2 = () => {
   return (
     <div className="px-3 pt-3">
       <Tabs
-        tabs={["Strokes", "Holes"]}
+        tabs={["Strokes", "Holes", "Countersink"]}
         selected={selectedTab}
         onSelect={setSelectedTab}
       />
@@ -224,6 +224,14 @@ const Page2 = () => {
           </div>
         </div>
       )}
+        {selectedTab === "Countersink" && (
+           <div className="mt-3">
+
+          <p className="text-xs">
+            Adds engrave layer, so holes can be slightly cone shaped. You'll have to cut as an engraving layer.
+          </p>
+          </div>
+        )}
     </div>
   );
 };
