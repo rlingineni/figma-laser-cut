@@ -11,8 +11,8 @@
     "build": "npm run generate-assets && npm run build-css && NODE_ENV=production rspack build --config rspack.config.js",
     "build-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css",
     "watch-css": "npx tailwindcss -i ./src/app/styles/input.css -o ./src/app/styles/ui.css --watch",
-    "api:dev": "IS_LOCAL=true deno run --allow-net --allow-read --allow-write --allow-env --watch api/main.ts",
-    "api:deploy": "cd api && deno deploy --prod",
+    "api:dev": "npm --prefix api run dev",
+    "api:deploy": "npm --prefix api run deploy",
     "dev:full": "concurrently \"yarn:dev\" \"yarn:api:dev\""
   },
   "dependencies": {

@@ -1,5 +1,3 @@
-/** @jsxImportSource npm:react@^18 */
-/// <reference types="npm:@types/react@^18" />
 import { renderToStaticMarkup } from "react-dom/server";
 import type { FileEntry } from "../storage.ts";
 
